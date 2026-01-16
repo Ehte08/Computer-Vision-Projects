@@ -38,6 +38,10 @@ while True:
         x3, y3 = int(lm3.x * w), int(lm3.y * h)
         x7, y7 = int(lm7.x * w), int(lm7.y * h)
 
+        z3 = lm3.z
+        z7 = lm7.z
+        is_behind = z3 > z7
+
         # highlight them
         cv.circle(frame, (x3, y3), 6, (0, 0, 255), -1)
         cv.circle(frame, (x7, y7), 6, (0, 255, 0), -1)
@@ -50,9 +54,9 @@ while True:
         cv.putText(frame, f"d={int(dist)}", (10, 40),
                    cv.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
-        # send message if they get close enough
+        # send message if they get close enough but only if the thumb is behind
         now = time.time()
-        if dist < DIST_THRESHOLD and (now - last_log_time) > LOG_COOLDOWN:
+        if is_behind and dist < DIST_THRESHOLD and (now - last_log_time) > LOG_COOLDOWN:
             send_heart()
             last_log_time = now
 
