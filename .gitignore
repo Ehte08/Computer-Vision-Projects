@@ -1,0 +1,15 @@
+# Datasets
+my_heroes/
+my_heroes_split/
+
+# Model weights
+*.pth
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
