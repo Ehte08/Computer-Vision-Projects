@@ -1,21 +1,32 @@
 import cv2 as cv
 import mediapipe as mp
+from mediapipe.tasks import python as mp_python
+from mediapipe.tasks.python import vision
 import time
 import mac_imessage
+import os
 
 def send_heart():
     text = '❤️'
     saiya = '+1-646-986-6723'
     mac_imessage.send_imessage(message=text, phone_number=saiya)
 
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(max_num_hands=1, model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5)
+_model_path = os.path.join(os.path.dirname(__file__), 'hand_landmarker.task')
+_base_options = mp_python.BaseOptions(model_asset_path=_model_path)
+_options = vision.HandLandmarkerOptions(
+    base_options=_base_options,
+    num_hands=1,
+    min_hand_detection_confidence=0.5,
+    min_hand_presence_confidence=0.5,
+    min_tracking_confidence=0.5,
+)
+hands = vision.HandLandmarker.create_from_options(_options)
 
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(1)
 
 last_log_time = 0
-LOG_COOLDOWN = 2  # time before repeating the action, so it's not spammy
-DIST_THRESHOLD = 30  # distance threshold, you can make this smaller or bigger
+LOG_COOLDOWN = 5
+DIST_THRESHOLD = 30  
 
 while True:
     ret, frame = cap.read()
@@ -26,14 +37,15 @@ while True:
     h, w, _ = frame.shape
 
     rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-    results = hands.process(rgb)
+    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
+    results = hands.detect(mp_image)
 
-    if results.multi_hand_landmarks:
-        hand_landmarks = results.multi_hand_landmarks[0]
+    if results.hand_landmarks:
+        hand_landmarks = results.hand_landmarks[0]
 
         # get landmarks 3 and 7 (indx finger and thumb tip bases)
-        lm3 = hand_landmarks.landmark[3]
-        lm7 = hand_landmarks.landmark[7]
+        lm3 = hand_landmarks[3]
+        lm7 = hand_landmarks[7]
 
         x3, y3 = int(lm3.x * w), int(lm3.y * h)
         x7, y7 = int(lm7.x * w), int(lm7.y * h)

@@ -22,9 +22,9 @@ transform = transforms.Compose([
 ])
 
 def load_model():
-    model = models.resnet18(weights=None)
+    model = models.resnet50(weights=None)
     model.fc = torch.nn.Linear(model.fc.in_features, len(CLASS_NAMES))
-    model.load_state_dict(torch.load(os.path.join(_DIR, "resnet18_superhero.pth"), map_location=DEVICE))
+    model.load_state_dict(torch.load(os.path.join(_DIR, "resnet50_superhero.pth"), map_location=DEVICE))
     model.to(DEVICE)
     model.eval()
     return model
